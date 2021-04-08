@@ -8,27 +8,40 @@ public class TicTacToe {
     public static final char player2 = 'O';
     private static final BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
     private final char[][] board;
+    private final Bot bot;
 
     private char lastMove;
 
     public TicTacToe() {
         this.board = new char[3][3];
         lastMove = player2;
+        bot = null;
+        game();
+    }
+
+    public TicTacToe(Difficulty difficulty) {
+        this.board = new char[3][3];
+        lastMove = player2;
+        bot = new Bot(difficulty, board);
         game();
     }
 
     private void game() {
         System.out.println(this.toString());
-         do {
+        do {
             Point move = getMoveByConsole();
             setMove(move);
             System.out.println(this.toString());
-        } while (checkWinner() == 0);
+            if (bot != null && checkWinner(board) == 0) {
+                setMove(bot.getMove());
+                System.out.println(this.toString());
+            }
+        } while (checkWinner(board) == 0);
         System.out.println(getWinner());
     }
 
     private String getWinner() {
-        int winner = checkWinner();
+        int winner = checkWinner(board);
         switch (winner) {
             case 'X':
                 return "X - win";
@@ -47,7 +60,7 @@ public class TicTacToe {
            1  - draw
            0  - not completed
      */
-    private int checkWinner() {
+    public static int checkWinner(char[][] board) {
         //rows
         for (int i = 0; i < board.length; i++) {
             boolean win = true;
@@ -62,13 +75,13 @@ public class TicTacToe {
         //columns
         for (int j = 0; j < board.length; j++) {
             boolean win = true;
-            for (int i = 0; i < board.length; i++) {
+            for (int i = 1; i < board.length; i++) {
                 if (board[i][j] == NULL_CHAR || board[i][j] != board[0][j]) {
                     win = false;
                     break;
                 }
             }
-            if (win) return board[j][0];
+            if (win) return board[0][j];
         }
         //diagonals
         boolean win = true;
@@ -90,13 +103,13 @@ public class TicTacToe {
         if (win) return board[0][2];
 
         //board filled
-        if (isBoardFilled())
+        if (isBoardFilled(board))
             return 1;
 
         return 0;
     }
 
-    private boolean isBoardFilled() {
+    public static boolean isBoardFilled(char[][] board) {
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board.length; j++) {
                 if (board[i][j] == NULL_CHAR)
